@@ -329,7 +329,7 @@ class OTPMonitorBot:
 async def main():
     # Updated configuration with new values
     TELEGRAM_BOT_TOKEN = "7955403590:AAFA_UsxTrbmiY9zSlFz3B9aZJ-XP0C2SYc"
-    GROUP_CHAT_ID = "-1003796890472"
+    GROUP_CHAT_ID = "-1003247504066"
     SESSION_COOKIE = "dc1b70e2a11390f31b6ce7caf7ed70ed"  # Updated session cookie
     TARGET_HOST = "15.235.182.3"  # Updated host
     TARGET_URL = f"http://{TARGET_HOST}/konekta/client/res/data_smscdr.php"  # Updated URL path
