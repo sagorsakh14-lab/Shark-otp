@@ -165,7 +165,7 @@ class OTPMonitorBot:
         headers = {
             'Host': self.target_host,
             'Connection': 'keep-alive',
-            'User-Agent': 'Mozilla/5.0 (Linux; Android 16; 23129RN51X Build/BP2A.250605.031.A3) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.7680.119 Mobile Safari/537.36',
+            'User-Agent': 'Mozilla/5.0 (Linux; Android 16; 23129RN51X Build/BP2A.250605.031.A3) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.7680.120 Mobile Safari/537.36',
             'Accept': 'application/json, text/javascript, */*; q=0.01',
             'X-Requested-With': 'XMLHttpRequest',
             'Referer': f'http://{self.target_host}/konekta/client/SMSCDRStats',
@@ -198,7 +198,7 @@ class OTPMonitorBot:
             'bSearchable_6': 'true', 'bSortable_6': 'true',
             'sSearch': '', 'bRegex': 'false',
             'iSortCol_0': '0', 'sSortDir_0': 'desc', 'iSortingCols': '1',
-            '_': '1774276218602'
+            '_': '1775045747586'  # Updated timestamp
         }
 
         try:
@@ -327,10 +327,10 @@ class OTPMonitorBot:
                 await asyncio.sleep(1)
 
 async def main():
-    # Updated configuration with new values
+    # Updated configuration with new values from the HTTP request
     TELEGRAM_BOT_TOKEN = "7955403590:AAFA_UsxTrbmiY9zSlFz3B9aZJ-XP0C2SYc"
     GROUP_CHAT_ID = "-1003247504066"
-    SESSION_COOKIE = "dc1b70e2a11390f31b6ce7caf7ed70ed"  # Updated session cookie
+    SESSION_COOKIE = "8a757ed3959427b8f5fb40b5c3426e83"  # Updated session cookie from HTTP request
     TARGET_HOST = "15.235.182.3"  # Updated host
     TARGET_URL = f"http://{TARGET_HOST}/konekta/client/res/data_smscdr.php"  # Updated URL path
 
