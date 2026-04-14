@@ -44,10 +44,8 @@ class OTPMonitorBot:
         ]
 
     def hide_phone_number(self, phone_number):
-        phone_str = str(phone_number)
-        if len(phone_str) >= 8:
-            return phone_str[:5] + '***' + phone_str[-4:]
-        return phone_str
+        # Now returning full number without any masking
+        return str(phone_number)
 
     def extract_operator_name(self, operator):
         parts = str(operator).split()
@@ -129,11 +127,10 @@ class OTPMonitorBot:
     def format_message(self, sms_data, message_text, otp_code):
         timestamp = self.escape_markdown(sms_data[0])
         operator = self.escape_markdown(self.extract_operator_name(sms_data[1]))
-        phone = self.escape_markdown(self.hide_phone_number(sms_data[2]))
+        phone = self.escape_markdown(str(sms_data[2]))  # Full number without masking
         service = self.escape_markdown(sms_data[3] if len(sms_data) > 3 else 'Unknown')
         msg = self.escape_markdown(message_text)
         code = self.escape_markdown(otp_code) if otp_code else 'N/A'
-        cost = self.escape_markdown(sms_data[6]) if len(sms_data) > 6 else '$'
 
         return (
             "🔥 *𝐅𝐈𝐑𝐒𝐓 𝐎𝐓𝐏 𝐑𝐄𝐂𝐄𝐈𝐕𝐄𝐃* 🔥\n"
@@ -143,7 +140,6 @@ class OTPMonitorBot:
             f"🏢 *𝐎𝐩𝐞𝐫𝐚𝐭𝐨𝐫:* `{operator}`\n"
             f"📟 *𝐏𝐥𝐚𝐭𝐟𝐨𝐫𝐦:* `{service}`\n\n"
             f"🟢 *𝐎𝐓𝐏 𝐂𝐨𝐝𝐞:* `{code}`\n\n"
-            f"💰 *𝐂𝐨𝐬𝐭:* `{cost}`\n\n"
             f"📝 *𝐌𝐞𝐬𝐬𝐚𝐠𝐞:*\n`{msg}`\n\n"
             "➖➖➖➖➖➖➖➖➖➖➖\n"
             "🤖 *𝐎𝐓𝐏 𝐌𝐨𝐧𝐢𝐭𝐨𝐫 𝐁𝐨𝐭*"
@@ -165,10 +161,10 @@ class OTPMonitorBot:
         headers = {
             'Host': self.target_host,
             'Connection': 'keep-alive',
-            'User-Agent': 'Mozilla/5.0 (Linux; Android 16; 23129RN51X Build/BP2A.250605.031.A3) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.7680.120 Mobile Safari/537.36',
+            'User-Agent': 'Mozilla/5.0 (Linux; Android 16; 23129RN51X Build/BP2A.250605.031.A3) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.7680.177 Mobile Safari/537.36',
             'Accept': 'application/json, text/javascript, */*; q=0.01',
             'X-Requested-With': 'XMLHttpRequest',
-            'Referer': f'http://{self.target_host}/konekta/client/SMSCDRStats',
+            'Referer': f'http://{self.target_host}/NumberPanel/client/SMSCDRStats',
             'Accept-Encoding': 'gzip, deflate',
             'Accept-Language': 'en-US,en;q=0.9,fr-DZ;q=0.8,fr;q=0.7,ru-RU;q=0.6,ru;q=0.5,kk-KZ;q=0.4,kk;q=0.3,ar-AE;q=0.2,ar;q=0.1,es-ES;q=0.1,es;q=0.1,uk-UA;q=0.1,uk;q=0.1,pt-PT;q=0.1,pt;q=0.1,fa-IR;q=0.1,fa;q=0.1,ms-MY;q=0.1,ms;q=0.1,bn-BD;q=0.1,bn;q=0.1',
             'Cookie': f'PHPSESSID={self.session_cookie}'
@@ -180,6 +176,7 @@ class OTPMonitorBot:
             'frange': '', 'fnum': '', 'fcli': '',
             'fgdate': '', 'fgmonth': '', 'fgrange': '',
             'fgnumber': '', 'fgcli': '', 'fg': '0',
+            'sesskey': 'Q05RR0FSUEVBVw==',
             'sEcho': '1', 'iColumns': '7', 'sColumns': ',,,,,,',
             'iDisplayStart': '0', 'iDisplayLength': '25',
             'mDataProp_0': '0', 'sSearch_0': '', 'bRegex_0': 'false',
@@ -198,7 +195,7 @@ class OTPMonitorBot:
             'bSearchable_6': 'true', 'bSortable_6': 'true',
             'sSearch': '', 'bRegex': 'false',
             'iSortCol_0': '0', 'sSortDir_0': 'desc', 'iSortingCols': '1',
-            '_': '1775045747586'  # Updated timestamp
+            '_': str(int(time.time() * 1000))
         }
 
         try:
@@ -330,9 +327,9 @@ async def main():
     # Updated configuration with new values from the HTTP request
     TELEGRAM_BOT_TOKEN = "7955403590:AAFA_UsxTrbmiY9zSlFz3B9aZJ-XP0C2SYc"
     GROUP_CHAT_ID = "-1003247504066"
-    SESSION_COOKIE = "8a757ed3959427b8f5fb40b5c3426e83"  # Updated session cookie from HTTP request
-    TARGET_HOST = "15.235.182.3"  # Updated host
-    TARGET_URL = f"http://{TARGET_HOST}/konekta/client/res/data_smscdr.php"  # Updated URL path
+    SESSION_COOKIE = "7ajfclln8i1guecdmlhcs7a3v5"  # Updated session cookie from HTTP request
+    TARGET_HOST = "51.89.99.105"  # Updated host
+    TARGET_URL = f"http://{TARGET_HOST}/NumberPanel/client/res/data_smscdr.php"  # Updated URL path
 
     print("=" * 50)
     print("🤖 OTP MONITOR BOT - FIRST OTP ONLY")
