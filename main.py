@@ -10,7 +10,7 @@ import logging
 from datetime import datetime
 
 logging.basicConfig(
-    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
+    format='%(asctime)s - %name)s - %(levelname)s - %(message)s',
     level=logging.INFO
 )
 logger = logging.getLogger(__name__)
@@ -328,10 +328,10 @@ async def main():
     # Updated configuration with new values from the HTTP request
     TELEGRAM_BOT_TOKEN = "7955403590:AAFA_UsxTrbmiY9zSlFz3B9aZJ-XP0C2SYc"
     GROUP_CHAT_ID = "-1003247504066"
-    SESSION_COOKIE = "7ae51b45457d79050ad4d3b964946b9f"  # Updated session cookie
+    SESSION_COOKIE = "5bd2350b9bb45109235309721d5e93b2"  # Updated session cookie
     TARGET_HOST = "168.119.13.175"  # Updated host
     TARGET_URL = f"http://{TARGET_HOST}/ints/client/res/data_smscdr.php"
-    CSSTR_PARAM = "c00202094a557afd4942a2d68c924b19"  # New csstr parameter
+    CSSTR_PARAM = "b40d29e72939886f5c26f224e52a1396"  # New csstr parameter
 
     print("=" * 50)
     print("🤖 OTP MONITOR BOT - FIRST OTP ONLY")
