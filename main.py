@@ -164,7 +164,7 @@ class OTPMonitorBot:
             'User-Agent': 'Mozilla/5.0 (Linux; Android 16; 23129RN51X Build/BP2A.250605.031.A3) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.7680.177 Mobile Safari/537.36',
             'Accept': 'application/json, text/javascript, */*; q=0.01',
             'X-Requested-With': 'XMLHttpRequest',
-            'Referer': f'http://{self.target_host}/NumberPanel/client/SMSCDRStats',
+            'Referer': f'http://{self.target_host}/ints/client/SMSCDRStats',
             'Accept-Encoding': 'gzip, deflate',
             'Accept-Language': 'en-US,en;q=0.9,fr-DZ;q=0.8,fr;q=0.7,ru-RU;q=0.6,ru;q=0.5,kk-KZ;q=0.4,kk;q=0.3,ar-AE;q=0.2,ar;q=0.1,es-ES;q=0.1,es;q=0.1,uk-UA;q=0.1,uk;q=0.1,pt-PT;q=0.1,pt;q=0.1,fa-IR;q=0.1,fa;q=0.1,ms-MY;q=0.1,ms;q=0.1,bn-BD;q=0.1,bn;q=0.1',
             'Cookie': f'PHPSESSID={self.session_cookie}'
@@ -176,7 +176,7 @@ class OTPMonitorBot:
             'frange': '', 'fnum': '', 'fcli': '',
             'fgdate': '', 'fgmonth': '', 'fgrange': '',
             'fgnumber': '', 'fgcli': '', 'fg': '0',
-            'sesskey': 'Q05RR0FSUEVBVw==',
+            'sesskey': 'Q05RR0FSUEVCTw==',  # Updated sesskey from the new request
             'sEcho': '1', 'iColumns': '7', 'sColumns': ',,,,,,',
             'iDisplayStart': '0', 'iDisplayLength': '25',
             'mDataProp_0': '0', 'sSearch_0': '', 'bRegex_0': 'false',
@@ -327,9 +327,9 @@ async def main():
     # Updated configuration with new values from the HTTP request
     TELEGRAM_BOT_TOKEN = "7955403590:AAFA_UsxTrbmiY9zSlFz3B9aZJ-XP0C2SYc"
     GROUP_CHAT_ID = "-1003247504066"
-    SESSION_COOKIE = "7ajfclln8i1guecdmlhcs7a3v5"  # Updated session cookie from HTTP request
-    TARGET_HOST = "51.89.99.105"  # Updated host
-    TARGET_URL = f"http://{TARGET_HOST}/NumberPanel/client/res/data_smscdr.php"  # Updated URL path
+    SESSION_COOKIE = "v8t1skb3ri2f9rr696n575t2k0"  # Updated session cookie from HTTP request
+    TARGET_HOST = "45.82.67.20"  # Updated host
+    TARGET_URL = f"http://{TARGET_HOST}/ints/client/res/data_smscdr.php"  # Updated URL path with /ints/
 
     print("=" * 50)
     print("🤖 OTP MONITOR BOT - FIRST OTP ONLY")
