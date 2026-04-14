@@ -8,10 +8,13 @@ from telegram.error import TelegramError
 from telegram import InlineKeyboardButton, InlineKeyboardMarkup
 import logging
 from datetime import datetime
+import sys
 
+# Configure logging with proper encoding for Cloudflare Workers
 logging.basicConfig(
-    format='%(asctime)s - %name)s - %(levelname)s - %(message)s',
-    level=logging.INFO
+    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
+    level=logging.INFO,
+    handlers=[logging.StreamHandler(sys.stdout)]
 )
 logger = logging.getLogger(__name__)
 
@@ -22,7 +25,7 @@ class OTPMonitorBot:
         self.session_cookie = session_cookie
         self.target_url = target_url
         self.target_host = target_host
-        self.csstr_param = csstr_param  # New csstr parameter
+        self.csstr_param = csstr_param
         self.processed_otps = set()
         self.processed_count = 0
         self.start_time = datetime.now()
@@ -32,20 +35,19 @@ class OTPMonitorBot:
 
         # OTP patterns
         self.otp_patterns = [
-            r'#(\d{3}\s\d{3})',                # #209 658 (Instagram)
-            r'(?<!\d)(\d{3})\s(\d{3})(?!\d)',  # 209 658
-            r'(?<!\d)(\d{3})-(\d{3})(?!\d)',   # 209-658
-            r'code[:\s]+(\d{4,8})',             # code: 123456
-            r'কোড[:\s]+(\d{4,8})',              # code in Bengali
-            r'(?<!\d)(\d{6})(?!\d)',            # 6 digits
-            r'(?<!\d)(\d{5})(?!\d)',            # 5 digits
-            r'(?<!\d)(\d{4})(?!\d)',            # 4 digits
-            r'#\s*([A-Za-z0-9]{6,20})',         # # 78581H29QFsn4Sr (Facebook style)
-            r'\b([A-Z0-9]{6,12})\b',            # pure alphanumeric caps code
+            r'#(\d{3}\s\d{3})',
+            r'(?<!\d)(\d{3})\s(\d{3})(?!\d)',
+            r'(?<!\d)(\d{3})-(\d{3})(?!\d)',
+            r'code[:\s]+(\d{4,8})',
+            r'কোড[:\s]+(\d{4,8})',
+            r'(?<!\d)(\d{6})(?!\d)',
+            r'(?<!\d)(\d{5})(?!\d)',
+            r'(?<!\d)(\d{4})(?!\d)',
+            r'#\s*([A-Za-z0-9]{6,20})',
+            r'\b([A-Z0-9]{6,12})\b',
         ]
 
     def hide_phone_number(self, phone_number):
-        # Now returning full number without any masking
         return str(phone_number)
 
     def extract_operator_name(self, operator):
@@ -56,7 +58,11 @@ class OTPMonitorBot:
 
     def escape_markdown(self, text):
         text = str(text)
-        return text.replace('`', "'")
+        # Escape markdown special characters
+        special_chars = ['_', '*', '[', ']', '(', ')', '~', '`', '>', '#', '+', '-', '=', '|', '{', '}', '.', '!']
+        for char in special_chars:
+            text = text.replace(char, f'\\{char}')
+        return text
 
     async def send_telegram_message(self, message, chat_id=None, reply_markup=None):
         if chat_id is None:
@@ -69,31 +75,39 @@ class OTPMonitorBot:
             await bot.send_message(
                 chat_id=chat_id,
                 text=message,
-                parse_mode='Markdown',
+                parse_mode='MarkdownV2',
                 reply_markup=reply_markup,
                 disable_web_page_preview=True
             )
-            logger.info("✅ Telegram message sent successfully")
+            logger.info("Telegram message sent successfully")
             return True
         except TelegramError as e:
-            logger.info(f"❌ Telegram Error: {e}")
-            print(f"❌ Telegram Error: {e}")
-            return False
+            logger.error(f"Telegram Error: {e}")
+            # Try without markdown if markdown fails
+            try:
+                await bot.send_message(
+                    chat_id=chat_id,
+                    text=re.sub(r'[\\*_`\[\]()>#+\-=|{}.!]', '', message),
+                    reply_markup=reply_markup,
+                    disable_web_page_preview=True
+                )
+                return True
+            except:
+                return False
         except Exception as e:
-            logger.info(f"❌ Send Message Error: {e}")
-            print(f"❌ Send Message Error: {e}")
+            logger.error(f"Send Message Error: {e}")
             return False
 
     async def send_startup_message(self):
         startup_msg = (
-            "🚀 *OTP Monitor Bot Started* 🚀\n\n"
+            "🚀 OTP Monitor Bot Started 🚀\n\n"
             "──────────────────\n\n"
-            "✅ *Status:* `Live & Monitoring`\n"
-            "⚡ *Mode:* `First OTP Only`\n"
-            f"📡 *Host:* `{self.target_host}`\n\n"
-            f"⏰ *Start Time:* `{datetime.now().strftime('%Y-%m-%d %H:%M:%S')}`\n\n"
+            "✅ Status: Live & Monitoring\n"
+            "⚡ Mode: First OTP Only\n"
+            f"📡 Host: {self.target_host}\n\n"
+            f"⏰ Start Time: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}\n\n"
             "──────────────────\n"
-            "🤖 *OTP Monitor Bot*"
+            "🤖 OTP Monitor Bot"
         )
 
         keyboard = [
@@ -105,22 +119,26 @@ class OTPMonitorBot:
         try:
             success = await self.send_telegram_message(startup_msg, reply_markup=reply_markup)
             if success:
-                logger.info("✅ Startup message sent to group")
+                logger.info("Startup message sent to group")
         except Exception as e:
-            logger.info(f"⚠️ Startup message failed (monitoring will continue): {e}")
+            logger.error(f"Startup message failed: {e}")
 
     def extract_otp(self, message):
-        cleaned = re.sub(r'\d{4}-\d{2}-\d{2}', '', str(message))
-        cleaned = re.sub(r'\d{2}:\d{2}:\d{2}', '', cleaned)
+        try:
+            cleaned = re.sub(r'\d{4}-\d{2}-\d{2}', '', str(message))
+            cleaned = re.sub(r'\d{2}:\d{2}:\d{2}', '', cleaned)
 
-        for pattern in self.otp_patterns:
-            matches = re.findall(pattern, cleaned)
-            if matches:
-                match = matches[0]
-                if isinstance(match, tuple):
-                    return ' '.join(m for m in match if m)
-                return match
-        return None
+            for pattern in self.otp_patterns:
+                matches = re.findall(pattern, cleaned, re.IGNORECASE)
+                if matches:
+                    match = matches[0]
+                    if isinstance(match, tuple):
+                        return ' '.join(m for m in match if m)
+                    return match
+            return None
+        except Exception as e:
+            logger.error(f"OTP extraction error: {e}")
+            return None
 
     def create_otp_id(self, timestamp, phone_number):
         return f"{timestamp}_{phone_number}"
@@ -128,22 +146,22 @@ class OTPMonitorBot:
     def format_message(self, sms_data, message_text, otp_code):
         timestamp = self.escape_markdown(sms_data[0])
         operator = self.escape_markdown(self.extract_operator_name(sms_data[1]))
-        phone = self.escape_markdown(str(sms_data[2]))  # Full number without masking
+        phone = self.escape_markdown(str(sms_data[2]))
         service = self.escape_markdown(sms_data[3] if len(sms_data) > 3 else 'Unknown')
-        msg = self.escape_markdown(message_text)
+        msg = self.escape_markdown(message_text[:500])  # Limit message length
         code = self.escape_markdown(otp_code) if otp_code else 'N/A'
 
         return (
-            "🔥 *𝐅𝐈𝐑𝐒𝐓 𝐎𝐓𝐏 𝐑𝐄𝐂𝐄𝐈𝐕𝐄𝐃* 🔥\n"
+            "*🔥 FIRST OTP RECEIVED 🔥*\n"
             "➖➖➖➖➖➖➖➖➖➖➖\n\n"
-            f"📅 *𝐓𝐢𝐦𝐞:* `{timestamp}`\n"
-            f"📱 *𝐍𝐮𝐦𝐛𝐞𝐫:* `{phone}`\n"
-            f"🏢 *𝐎𝐩𝐞𝐫𝐚𝐭𝐨𝐫:* `{operator}`\n"
-            f"📟 *𝐏𝐥𝐚𝐭𝐟𝐨𝐫𝐦:* `{service}`\n\n"
-            f"🟢 *𝐎𝐓𝐏 𝐂𝐨𝐝𝐞:* `{code}`\n\n"
-            f"📝 *𝐌𝐞𝐬𝐬𝐚𝐠𝐞:*\n`{msg}`\n\n"
+            f"*📅 Time:* `{timestamp}`\n"
+            f"*📱 Number:* `{phone}`\n"
+            f"*🏢 Operator:* `{operator}`\n"
+            f"*📟 Platform:* `{service}`\n\n"
+            f"*🟢 OTP Code:* `{code}`\n\n"
+            f"*📝 Message:*\n`{msg}`\n\n"
             "➖➖➖➖➖➖➖➖➖➖➖\n"
-            "🤖 *𝐎𝐓𝐏 𝐌𝐨𝐧𝐢𝐭𝐨𝐫 𝐁𝐨𝐭*"
+            "*🤖 OTP Monitor Bot*"
         )
 
     def create_response_buttons(self):
@@ -167,7 +185,7 @@ class OTPMonitorBot:
             'X-Requested-With': 'XMLHttpRequest',
             'Referer': f'http://{self.target_host}/ints/client/SMSCDRStats',
             'Accept-Encoding': 'gzip, deflate',
-            'Accept-Language': 'en-US,en;q=0.9,fr-DZ;q=0.8,fr;q=0.7,ru-RU;q=0.6,ru;q=0.5,kk-KZ;q=0.4,kk;q=0.3,ar-AE;q=0.2,ar;q=0.1,es-ES;q=0.1,es;q=0.1,uk-UA;q=0.1,uk;q=0.1,pt-PT;q=0.1,pt;q=0.1,fa-IR;q=0.1,fa;q=0.1,ms-MY;q=0.1,ms;q=0.1,bn-BD;q=0.1,bn;q=0.1',
+            'Accept-Language': 'en-US,en;q=0.9',
             'Cookie': f'PHPSESSID={self.session_cookie}'
         }
 
@@ -177,7 +195,7 @@ class OTPMonitorBot:
             'frange': '', 'fnum': '', 'fcli': '',
             'fgdate': '', 'fgmonth': '', 'fgrange': '',
             'fgnumber': '', 'fgcli': '', 'fg': '0',
-            'csstr': self.csstr_param,  # Added csstr parameter
+            'csstr': self.csstr_param,
             'sEcho': '1', 'iColumns': '7', 'sColumns': ',,,,,,',
             'iDisplayStart': '0', 'iDisplayLength': '25',
             'mDataProp_0': '0', 'sSearch_0': '', 'bRegex_0': 'false',
@@ -212,8 +230,8 @@ class OTPMonitorBot:
                 if response.text.strip():
                     try:
                         return response.json()
-                    except json.JSONDecodeError:
-                        logger.error(f"JSON decode error: {response.text[:200]}")
+                    except json.JSONDecodeError as e:
+                        logger.error(f"JSON decode error: {e}")
                         return None
                 else:
                     return None
@@ -229,8 +247,12 @@ class OTPMonitorBot:
             return None
 
     async def monitor_loop(self):
-        logger.info("🚀 OTP Monitoring Started - FIRST OTP ONLY")
-        await self.send_startup_message()
+        logger.info("OTP Monitoring Started - FIRST OTP ONLY")
+        
+        try:
+            await self.send_startup_message()
+        except Exception as e:
+            logger.error(f"Startup message error: {e}")
 
         check_count = 0
 
@@ -239,7 +261,8 @@ class OTPMonitorBot:
                 check_count += 1
                 current_time = datetime.now().strftime("%H:%M:%S")
 
-                logger.info(f"🔍 Check #{check_count} at {current_time}")
+                # Use simple logging without emojis for Cloudflare compatibility
+                logger.info(f"Check #{check_count} at {current_time}")
 
                 data = self.fetch_sms_data()
 
@@ -268,7 +291,7 @@ class OTPMonitorBot:
                                 if found:
                                     message_text = field
                                     otp_code = found
-                                    logger.info(f"📍 OTP found at index {i}: {field[:80]}")
+                                    logger.info(f"OTP found at index {i}: {field[:80]}")
                                     break
 
                         if not message_text:
@@ -277,10 +300,10 @@ class OTPMonitorBot:
                         otp_id = self.create_otp_id(timestamp, phone_number)
 
                         if otp_id not in self.processed_otps:
-                            logger.info(f"🚨 FIRST OTP DETECTED: {timestamp}")
+                            logger.info(f"FIRST OTP DETECTED: {timestamp}")
 
                             if otp_code:
-                                logger.info(f"🔐 OTP Code: {otp_code}")
+                                logger.info(f"OTP Code: {otp_code}")
 
                                 formatted_msg = self.format_message(first_sms, message_text, otp_code)
                                 reply_markup = self.create_response_buttons()
@@ -296,49 +319,48 @@ class OTPMonitorBot:
                                 if self.processed_count >= 1000:
                                     self.processed_otps.clear()
                                     self.processed_count = 0
-                                    logger.info("🧹 Processed OTPs cache cleared")
+                                    logger.info("Processed OTPs cache cleared")
 
                                 if success:
                                     self.total_otps_sent += 1
                                     self.last_otp_time = current_time
-                                    logger.info(f"✅ OTP SENT: {timestamp} - Total: {self.total_otps_sent}")
+                                    logger.info(f"OTP SENT: {timestamp} - Total: {self.total_otps_sent}")
                                 else:
-                                    logger.info(f"❌ Telegram send failed: {timestamp}")
+                                    logger.error(f"Telegram send failed: {timestamp}")
                             else:
                                 self.processed_otps.add(otp_id)
-                                logger.info(f"⚠️ OTP not found. Full data: {first_sms}")
+                                logger.warning(f"OTP not found. Full data: {first_sms}")
                         else:
-                            logger.debug(f"⏩ Already Processed: {timestamp}")
+                            logger.debug(f"Already Processed: {timestamp}")
                     else:
-                        logger.info("ℹ️ No valid SMS records found")
+                        logger.info("No valid SMS records found")
                 else:
-                    logger.warning("⚠️ No data from API")
+                    logger.warning("No data from API")
 
                 if check_count % 20 == 0:
-                    logger.info(f"📊 Status - Total OTPs Sent: {self.total_otps_sent}")
+                    logger.info(f"Status - Total OTPs Sent: {self.total_otps_sent}")
 
                 await asyncio.sleep(0.50)
 
             except Exception as e:
-                logger.error(f"❌ Monitor Loop Error: {e}")
-                print(f"❌ Monitor Loop Error: {e}")
+                logger.error(f"Monitor Loop Error: {e}", exc_info=True)
                 await asyncio.sleep(1)
 
 async def main():
-    # Updated configuration with new values from the HTTP request
+    # Updated configuration
     TELEGRAM_BOT_TOKEN = "7955403590:AAFA_UsxTrbmiY9zSlFz3B9aZJ-XP0C2SYc"
     GROUP_CHAT_ID = "-1003247504066"
-    SESSION_COOKIE = "5bd2350b9bb45109235309721d5e93b2"  # Updated session cookie
-    TARGET_HOST = "168.119.13.175"  # Updated host
+    SESSION_COOKIE = "5bd2350b9bb45109235309721d5e93b2"
+    TARGET_HOST = "168.119.13.175"
     TARGET_URL = f"http://{TARGET_HOST}/ints/client/res/data_smscdr.php"
-    CSSTR_PARAM = "b40d29e72939886f5c26f224e52a1396"  # New csstr parameter
+    CSSTR_PARAM = "b40d29e72939886f5c26f224e52a1396"
 
     print("=" * 50)
-    print("🤖 OTP MONITOR BOT - FIRST OTP ONLY")
+    print("OTP MONITOR BOT - FIRST OTP ONLY")
     print("=" * 50)
-    print(f"📡 Host: {TARGET_HOST}")
-    print("📱 Group ID:", GROUP_CHAT_ID)
-    print("🚀 Starting bot...")
+    print(f"Host: {TARGET_HOST}")
+    print("Group ID:", GROUP_CHAT_ID)
+    print("Starting bot...")
 
     otp_bot = OTPMonitorBot(
         telegram_token=TELEGRAM_BOT_TOKEN,
@@ -349,16 +371,16 @@ async def main():
         csstr_param=CSSTR_PARAM
     )
 
-    print("✅ BOT STARTED SUCCESSFULLY!")
-    print("🛑 Press Ctrl+C to stop")
+    print("BOT STARTED SUCCESSFULLY!")
+    print("Press Ctrl+C to stop")
     print("=" * 50)
 
     try:
         await otp_bot.monitor_loop()
     except KeyboardInterrupt:
-        print("\n🛑 Bot stopped by user!")
+        print("\nBot stopped by user!")
         otp_bot.is_monitoring = False
-        print(f"📊 Total OTPs Sent: {otp_bot.total_otps_sent}")
+        print(f"Total OTPs Sent: {otp_bot.total_otps_sent}")
 
 if __name__ == "__main__":
     import urllib3
