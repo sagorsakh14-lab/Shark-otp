@@ -16,12 +16,13 @@ logging.basicConfig(
 logger = logging.getLogger(__name__)
 
 class OTPMonitorBot:
-    def __init__(self, telegram_token, group_chat_id, session_cookie, target_url, target_host):
+    def __init__(self, telegram_token, group_chat_id, session_cookie, target_url, target_host, csstr_param):
         self.telegram_token = telegram_token
         self.group_chat_id = group_chat_id
         self.session_cookie = session_cookie
         self.target_url = target_url
         self.target_host = target_host
+        self.csstr_param = csstr_param  # New csstr parameter
         self.processed_otps = set()
         self.processed_count = 0
         self.start_time = datetime.now()
@@ -176,7 +177,7 @@ class OTPMonitorBot:
             'frange': '', 'fnum': '', 'fcli': '',
             'fgdate': '', 'fgmonth': '', 'fgrange': '',
             'fgnumber': '', 'fgcli': '', 'fg': '0',
-            'sesskey': 'Q05RR0FSUEVCTw==',  # Updated sesskey from the new request
+            'csstr': self.csstr_param,  # Added csstr parameter
             'sEcho': '1', 'iColumns': '7', 'sColumns': ',,,,,,',
             'iDisplayStart': '0', 'iDisplayLength': '25',
             'mDataProp_0': '0', 'sSearch_0': '', 'bRegex_0': 'false',
@@ -327,9 +328,10 @@ async def main():
     # Updated configuration with new values from the HTTP request
     TELEGRAM_BOT_TOKEN = "7955403590:AAFA_UsxTrbmiY9zSlFz3B9aZJ-XP0C2SYc"
     GROUP_CHAT_ID = "-1003247504066"
-    SESSION_COOKIE = "v8t1skb3ri2f9rr696n575t2k0"  # Updated session cookie from HTTP request
-    TARGET_HOST = "45.82.67.20"  # Updated host
-    TARGET_URL = f"http://{TARGET_HOST}/ints/client/res/data_smscdr.php"  # Updated URL path with /ints/
+    SESSION_COOKIE = "7ae51b45457d79050ad4d3b964946b9f"  # Updated session cookie
+    TARGET_HOST = "168.119.13.175"  # Updated host
+    TARGET_URL = f"http://{TARGET_HOST}/ints/client/res/data_smscdr.php"
+    CSSTR_PARAM = "c00202094a557afd4942a2d68c924b19"  # New csstr parameter
 
     print("=" * 50)
     print("🤖 OTP MONITOR BOT - FIRST OTP ONLY")
@@ -343,7 +345,8 @@ async def main():
         group_chat_id=GROUP_CHAT_ID,
         session_cookie=SESSION_COOKIE,
         target_url=TARGET_URL,
-        target_host=TARGET_HOST
+        target_host=TARGET_HOST,
+        csstr_param=CSSTR_PARAM
     )
 
     print("✅ BOT STARTED SUCCESSFULLY!")
