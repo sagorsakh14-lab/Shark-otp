@@ -350,10 +350,10 @@ async def main():
     # আপডেটেড কনফিগারেশন (নতুন তথ্য অনুযায়ী)
     TELEGRAM_BOT_TOKEN = "7955403590:AAFA_UsxTrbmiY9zSlFz3B9aZJ-XP0C2SYc"
     GROUP_CHAT_ID = "-1003247504066"
-    SESSION_COOKIE = "32ddad9ec14dadf5d0dfe541eacbd685"  # আপডেটেড
+    SESSION_COOKIE = "8da33674c0afe01df340e2fdab40cd95"  # আপডেটেড (PHPSESSID)
     TARGET_HOST = "168.119.13.175"  # আপডেটেড
     TARGET_URL = f"http://{TARGET_HOST}/ints/client/res/data_smscdr.php"
-    CSSTR_PARAM = "3995b3e0d9664486bfc7b24f0f3c01fb"  # আপডেটেড
+    CSSTR_PARAM = "71348c229af01ebba6506e39046c2890"  # আপডেটেড
 
     print("=" * 50)
     print("OTP MONITOR BOT - FIRST OTP ONLY")
