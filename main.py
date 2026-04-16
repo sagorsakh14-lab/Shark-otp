@@ -10,7 +10,7 @@ import logging
 from datetime import datetime
 import sys
 
-# Configure logging with proper encoding for Cloudflare Workers
+# Configure logging with proper encoding
 logging.basicConfig(
     format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
     level=logging.INFO,
@@ -19,13 +19,12 @@ logging.basicConfig(
 logger = logging.getLogger(__name__)
 
 class OTPMonitorBot:
-    def __init__(self, telegram_token, group_chat_id, session_cookie, target_url, target_host, csstr_param):
+    def __init__(self, telegram_token, group_chat_id, session_cookie, target_url, target_host):
         self.telegram_token = telegram_token
         self.group_chat_id = group_chat_id
         self.session_cookie = session_cookie
         self.target_url = target_url
         self.target_host = target_host
-        self.csstr_param = csstr_param
         self.processed_otps = set()
         self.processed_count = 0
         self.start_time = datetime.now()
@@ -48,7 +47,10 @@ class OTPMonitorBot:
         ]
 
     def hide_phone_number(self, phone_number):
-        return str(phone_number)
+        phone_str = str(phone_number)
+        if len(phone_str) >= 8:
+            return phone_str[:5] + '***' + phone_str[-4:]
+        return phone_str
 
     def extract_operator_name(self, operator):
         parts = str(operator).split()
@@ -146,9 +148,9 @@ class OTPMonitorBot:
     def format_message(self, sms_data, message_text, otp_code):
         timestamp = self.escape_markdown(sms_data[0])
         operator = self.escape_markdown(self.extract_operator_name(sms_data[1]))
-        phone = self.escape_markdown(str(sms_data[2]))
+        phone = self.escape_markdown(self.hide_phone_number(sms_data[2]))
         service = self.escape_markdown(sms_data[3] if len(sms_data) > 3 else 'Unknown')
-        msg = self.escape_markdown(message_text[:500])  # Limit message length
+        msg = self.escape_markdown(message_text[:500])
         code = self.escape_markdown(otp_code) if otp_code else 'N/A'
 
         return (
@@ -195,7 +197,6 @@ class OTPMonitorBot:
             'frange': '', 'fnum': '', 'fcli': '',
             'fgdate': '', 'fgmonth': '', 'fgrange': '',
             'fgnumber': '', 'fgcli': '', 'fg': '0',
-            'csstr': self.csstr_param,
             'sEcho': '1', 'iColumns': '7', 'sColumns': ',,,,,,',
             'iDisplayStart': '0', 'iDisplayLength': '25',
             'mDataProp_0': '0', 'sSearch_0': '', 'bRegex_0': 'false',
@@ -261,7 +262,6 @@ class OTPMonitorBot:
                 check_count += 1
                 current_time = datetime.now().strftime("%H:%M:%S")
 
-                # Use simple logging without emojis for Cloudflare compatibility
                 logger.info(f"Check #{check_count} at {current_time}")
 
                 data = self.fetch_sms_data()
@@ -347,13 +347,12 @@ class OTPMonitorBot:
                 await asyncio.sleep(1)
 
 async def main():
-    # আপডেটেড কনফিগারেশন (নতুন তথ্য অনুযায়ী)
+    # কনফিগারেশন (আপনার তথ্য অনুযায়ী আপডেট করুন)
     TELEGRAM_BOT_TOKEN = "7955403590:AAFA_UsxTrbmiY9zSlFz3B9aZJ-XP0C2SYc"
     GROUP_CHAT_ID = "-1003247504066"
-    SESSION_COOKIE = "8da33674c0afe01df340e2fdab40cd95"  # আপডেটেড (PHPSESSID)
-    TARGET_HOST = "168.119.13.175"  # আপডেটেড
+    SESSION_COOKIE = "8da33674c0afe01df340e2fdab40cd95"
+    TARGET_HOST = "168.119.13.175"
     TARGET_URL = f"http://{TARGET_HOST}/ints/client/res/data_smscdr.php"
-    CSSTR_PARAM = "71348c229af01ebba6506e39046c2890"  # আপডেটেড
 
     print("=" * 50)
     print("OTP MONITOR BOT - FIRST OTP ONLY")
@@ -367,8 +366,7 @@ async def main():
         group_chat_id=GROUP_CHAT_ID,
         session_cookie=SESSION_COOKIE,
         target_url=TARGET_URL,
-        target_host=TARGET_HOST,
-        csstr_param=CSSTR_PARAM
+        target_host=TARGET_HOST
     )
 
     print("BOT STARTED SUCCESSFULLY!")
