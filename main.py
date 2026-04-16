@@ -153,10 +153,10 @@ class OTPMonitorBot:
 
     def create_response_buttons(self):
         keyboard = [
-            [InlineKeyboardButton("📱 Number Channel", url="https://t.me/FBDEALZONEofficial")],
+            [InlineKeyboardButton("📱 Number Channel", url="https://t.me/earning_hub_number_channel")],
             [
-                InlineKeyboardButton("👨‍💻 Developer", url="https://t.me/FBDEALZONEOWNER"),
-                InlineKeyboardButton("📢 Channel", url="https://t.me/FBDEALZONEofficial")
+                InlineKeyboardButton("🤖 Number bot", url="https://t.me/EARNING_HUB_NUMBER_BOT"),
+                InlineKeyboardButton("📢 main Channel", url="https://t.me/earning_hub_official_channel")
             ]
         ]
         return InlineKeyboardMarkup(keyboard)
