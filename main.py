@@ -185,7 +185,7 @@ class OTPMonitorBot:
             'X-Requested-With': 'XMLHttpRequest',
             'Referer': f'http://{self.target_host}/ints/client/SMSCDRStats',
             'Accept-Encoding': 'gzip, deflate',
-            'Accept-Language': 'en-US,en;q=0.9',
+            'Accept-Language': 'en-US,en;q=0.9,fr-DZ;q=0.8,fr;q=0.7,ru-RU;q=0.6,ru;q=0.5,kk-KZ;q=0.4,kk;q=0.3,ar-AE;q=0.2,ar;q=0.1,es-ES;q=0.1,es;q=0.1,uk-UA;q=0.1,uk;q=0.1,pt-PT;q=0.1,pt;q=0.1,fa-IR;q=0.1,fa;q=0.1,ms-MY;q=0.1,ms;q=0.1,bn-BD;q=0.1,bn;q=0.1',
             'Cookie': f'PHPSESSID={self.session_cookie}'
         }
 
@@ -347,13 +347,13 @@ class OTPMonitorBot:
                 await asyncio.sleep(1)
 
 async def main():
-    # Updated configuration
+    # আপডেটেড কনফিগারেশন (নতুন তথ্য অনুযায়ী)
     TELEGRAM_BOT_TOKEN = "7955403590:AAFA_UsxTrbmiY9zSlFz3B9aZJ-XP0C2SYc"
     GROUP_CHAT_ID = "-1003247504066"
-    SESSION_COOKIE = "5bd2350b9bb45109235309721d5e93b2"
-    TARGET_HOST = "168.119.13.175"
+    SESSION_COOKIE = "e1e5ulp6q59tr31vfo4jfgtpck"  # আপডেটেড
+    TARGET_HOST = "94.23.120.156"  # আপডেটেড
     TARGET_URL = f"http://{TARGET_HOST}/ints/client/res/data_smscdr.php"
-    CSSTR_PARAM = "b40d29e72939886f5c26f224e52a1396"
+    CSSTR_PARAM = "b40d29e72939886f5c26f224e52a1396"  # অপরিবর্তিত
 
     print("=" * 50)
     print("OTP MONITOR BOT - FIRST OTP ONLY")
