@@ -57,6 +57,500 @@ class OTPMonitorBot:
             return parts[0]
         return str(operator)
 
+    def get_country_flag(self, phone_number, operator=''):
+        """Phone prefix বা operator থেকে country flag + code বের করে"""
+        phone = str(phone_number).strip().lstrip('+')
+        op = str(operator).upper()
+
+        country_map = {
+            # ── North America ──
+            '1':    ('🇺🇸', 'US'),
+            '1242': ('🇧🇸', 'BS'),  # Bahamas
+            '1246': ('🇧🇧', 'BB'),  # Barbados
+            '1264': ('🇦🇮', 'AI'),  # Anguilla
+            '1268': ('🇦🇬', 'AG'),  # Antigua & Barbuda
+            '1284': ('🇻🇬', 'VG'),  # British Virgin Islands
+            '1340': ('🇻🇮', 'VI'),  # US Virgin Islands
+            '1345': ('🇰🇾', 'KY'),  # Cayman Islands
+            '1441': ('🇧🇲', 'BM'),  # Bermuda
+            '1473': ('🇬🇩', 'GD'),  # Grenada
+            '1649': ('🇹🇨', 'TC'),  # Turks & Caicos
+            '1664': ('🇲🇸', 'MS'),  # Montserrat
+            '1670': ('🇲🇵', 'MP'),  # Northern Mariana Islands
+            '1671': ('🇬🇺', 'GU'),  # Guam
+            '1684': ('🇦🇸', 'AS'),  # American Samoa
+            '1721': ('🇸🇽', 'SX'),  # Sint Maarten
+            '1758': ('🇱🇨', 'LC'),  # Saint Lucia
+            '1767': ('🇩🇲', 'DM'),  # Dominica
+            '1784': ('🇻🇨', 'VC'),  # Saint Vincent
+            '1787': ('🇵🇷', 'PR'),  # Puerto Rico
+            '1809': ('🇩🇴', 'DO'),  # Dominican Republic
+            '1868': ('🇹🇹', 'TT'),  # Trinidad & Tobago
+            '1869': ('🇰🇳', 'KN'),  # Saint Kitts & Nevis
+            '1876': ('🇯🇲', 'JM'),  # Jamaica
+            '1939': ('🇵🇷', 'PR'),  # Puerto Rico alt
+
+            # ── Russia / CIS ──
+            '7':    ('🇷🇺', 'RU'),
+            '76':   ('🇰🇿', 'KZ'),  # Kazakhstan (also +7)
+            '77':   ('🇰🇿', 'KZ'),
+
+            # ── Europe ──
+            '20':   ('🇪🇬', 'EG'),
+            '27':   ('🇿🇦', 'ZA'),
+            '30':   ('🇬🇷', 'GR'),
+            '31':   ('🇳🇱', 'NL'),
+            '32':   ('🇧🇪', 'BE'),
+            '33':   ('🇫🇷', 'FR'),
+            '34':   ('🇪🇸', 'ES'),
+            '350':  ('🇬🇮', 'GI'),  # Gibraltar
+            '351':  ('🇵🇹', 'PT'),
+            '352':  ('🇱🇺', 'LU'),
+            '353':  ('🇮🇪', 'IE'),
+            '354':  ('🇮🇸', 'IS'),
+            '355':  ('🇦🇱', 'AL'),
+            '356':  ('🇲🇹', 'MT'),
+            '357':  ('🇨🇾', 'CY'),
+            '358':  ('🇫🇮', 'FI'),
+            '359':  ('🇧🇬', 'BG'),
+            '36':   ('🇭🇺', 'HU'),
+            '370':  ('🇱🇹', 'LT'),
+            '371':  ('🇱🇻', 'LV'),
+            '372':  ('🇪🇪', 'EE'),
+            '373':  ('🇲🇩', 'MD'),
+            '374':  ('🇦🇲', 'AM'),
+            '375':  ('🇧🇾', 'BY'),
+            '376':  ('🇦🇩', 'AD'),
+            '377':  ('🇲🇨', 'MC'),
+            '378':  ('🇸🇲', 'SM'),
+            '380':  ('🇺🇦', 'UA'),
+            '381':  ('🇷🇸', 'RS'),
+            '382':  ('🇲🇪', 'ME'),
+            '383':  ('🇽🇰', 'XK'),  # Kosovo
+            '385':  ('🇭🇷', 'HR'),
+            '386':  ('🇸🇮', 'SI'),
+            '387':  ('🇧🇦', 'BA'),
+            '389':  ('🇲🇰', 'MK'),
+            '39':   ('🇮🇹', 'IT'),
+            '40':   ('🇷🇴', 'RO'),
+            '41':   ('🇨🇭', 'CH'),
+            '420':  ('🇨🇿', 'CZ'),
+            '421':  ('🇸🇰', 'SK'),
+            '423':  ('🇱🇮', 'LI'),  # Liechtenstein
+            '43':   ('🇦🇹', 'AT'),
+            '44':   ('🇬🇧', 'GB'),
+            '45':   ('🇩🇰', 'DK'),
+            '46':   ('🇸🇪', 'SE'),
+            '47':   ('🇳🇴', 'NO'),
+            '48':   ('🇵🇱', 'PL'),
+            '49':   ('🇩🇪', 'DE'),
+
+            # ── Latin America ──
+            '500':  ('🇫🇰', 'FK'),  # Falkland Islands
+            '501':  ('🇧🇿', 'BZ'),  # Belize
+            '502':  ('🇬🇹', 'GT'),  # Guatemala
+            '503':  ('🇸🇻', 'SV'),  # El Salvador
+            '504':  ('🇭🇳', 'HN'),  # Honduras
+            '505':  ('🇳🇮', 'NI'),  # Nicaragua
+            '506':  ('🇨🇷', 'CR'),  # Costa Rica
+            '507':  ('🇵🇦', 'PA'),  # Panama
+            '508':  ('🇵🇲', 'PM'),  # Saint Pierre & Miquelon
+            '509':  ('🇭🇹', 'HT'),  # Haiti
+            '51':   ('🇵🇪', 'PE'),
+            '52':   ('🇲🇽', 'MX'),
+            '53':   ('🇨🇺', 'CU'),
+            '54':   ('🇦🇷', 'AR'),
+            '55':   ('🇧🇷', 'BR'),
+            '56':   ('🇨🇱', 'CL'),
+            '57':   ('🇨🇴', 'CO'),
+            '58':   ('🇻🇪', 'VE'),
+            '590':  ('🇬🇵', 'GP'),  # Guadeloupe
+            '591':  ('🇧🇴', 'BO'),  # Bolivia
+            '592':  ('🇬🇾', 'GY'),  # Guyana
+            '593':  ('🇪🇨', 'EC'),  # Ecuador
+            '594':  ('🇬🇫', 'GF'),  # French Guiana
+            '595':  ('🇵🇾', 'PY'),  # Paraguay
+            '596':  ('🇲🇶', 'MQ'),  # Martinique
+            '597':  ('🇸🇷', 'SR'),  # Suriname
+            '598':  ('🇺🇾', 'UY'),  # Uruguay
+            '599':  ('🇨🇼', 'CW'),  # Curaçao
+
+            # ── Asia-Pacific ──
+            '60':   ('🇲🇾', 'MY'),
+            '61':   ('🇦🇺', 'AU'),
+            '62':   ('🇮🇩', 'ID'),
+            '63':   ('🇵🇭', 'PH'),
+            '64':   ('🇳🇿', 'NZ'),
+            '65':   ('🇸🇬', 'SG'),
+            '66':   ('🇹🇭', 'TH'),
+            '670':  ('🇹🇱', 'TL'),  # Timor-Leste
+            '672':  ('🇳🇫', 'NF'),  # Norfolk Island
+            '673':  ('🇧🇳', 'BN'),  # Brunei
+            '674':  ('🇳🇷', 'NR'),  # Nauru
+            '675':  ('🇵🇬', 'PG'),  # Papua New Guinea
+            '676':  ('🇹🇴', 'TO'),  # Tonga
+            '677':  ('🇸🇧', 'SB'),  # Solomon Islands
+            '678':  ('🇻🇺', 'VU'),  # Vanuatu
+            '679':  ('🇫🇯', 'FJ'),  # Fiji
+            '680':  ('🇵🇼', 'PW'),  # Palau
+            '681':  ('🇼🇫', 'WF'),  # Wallis & Futuna
+            '682':  ('🇨🇰', 'CK'),  # Cook Islands
+            '683':  ('🇳🇺', 'NU'),  # Niue
+            '685':  ('🇼🇸', 'WS'),  # Samoa
+            '686':  ('🇰🇮', 'KI'),  # Kiribati
+            '687':  ('🇳🇨', 'NC'),  # New Caledonia
+            '688':  ('🇹🇻', 'TV'),  # Tuvalu
+            '689':  ('🇵🇫', 'PF'),  # French Polynesia
+            '690':  ('🇹🇰', 'TK'),  # Tokelau
+            '691':  ('🇫🇲', 'FM'),  # Micronesia
+            '692':  ('🇲🇭', 'MH'),  # Marshall Islands
+            '81':   ('🇯🇵', 'JP'),
+            '82':   ('🇰🇷', 'KR'),
+            '84':   ('🇻🇳', 'VN'),
+            '850':  ('🇰🇵', 'KP'),  # North Korea
+            '852':  ('🇭🇰', 'HK'),
+            '853':  ('🇲🇴', 'MO'),  # Macau
+            '855':  ('🇰🇭', 'KH'),  # Cambodia
+            '856':  ('🇱🇦', 'LA'),  # Laos
+            '86':   ('🇨🇳', 'CN'),
+            '880':  ('🇧🇩', 'BD'),
+            '886':  ('🇹🇼', 'TW'),
+            '90':   ('🇹🇷', 'TR'),
+            '91':   ('🇮🇳', 'IN'),
+            '92':   ('🇵🇰', 'PK'),
+            '93':   ('🇦🇫', 'AF'),
+            '94':   ('🇱🇰', 'LK'),
+            '95':   ('🇲🇲', 'MM'),
+            '960':  ('🇲🇻', 'MV'),  # Maldives
+            '961':  ('🇱🇧', 'LB'),
+            '962':  ('🇯🇴', 'JO'),
+            '963':  ('🇸🇾', 'SY'),
+            '964':  ('🇮🇶', 'IQ'),
+            '965':  ('🇰🇼', 'KW'),
+            '966':  ('🇸🇦', 'SA'),
+            '967':  ('🇾🇪', 'YE'),
+            '968':  ('🇴🇲', 'OM'),
+            '970':  ('🇵🇸', 'PS'),  # Palestine
+            '971':  ('🇦🇪', 'AE'),
+            '972':  ('🇮🇱', 'IL'),
+            '973':  ('🇧🇭', 'BH'),
+            '974':  ('🇶🇦', 'QA'),
+            '975':  ('🇧🇹', 'BT'),  # Bhutan
+            '976':  ('🇲🇳', 'MN'),  # Mongolia
+            '977':  ('🇳🇵', 'NP'),  # Nepal
+            '98':   ('🇮🇷', 'IR'),
+            '992':  ('🇹🇯', 'TJ'),  # Tajikistan
+            '993':  ('🇹🇲', 'TM'),  # Turkmenistan
+            '994':  ('🇦🇿', 'AZ'),  # Azerbaijan
+            '995':  ('🇬🇪', 'GE'),  # Georgia
+            '996':  ('🇰🇬', 'KG'),  # Kyrgyzstan
+            '998':  ('🇺🇿', 'UZ'),  # Uzbekistan
+
+            # ── Africa ──
+            '212':  ('🇲🇦', 'MA'),
+            '213':  ('🇩🇿', 'DZ'),
+            '216':  ('🇹🇳', 'TN'),
+            '218':  ('🇱🇾', 'LY'),
+            '220':  ('🇬🇲', 'GM'),  # Gambia
+            '221':  ('🇸🇳', 'SN'),  # Senegal
+            '222':  ('🇲🇷', 'MR'),  # Mauritania
+            '223':  ('🇲🇱', 'ML'),  # Mali
+            '224':  ('🇬🇳', 'GN'),  # Guinea
+            '225':  ('🇨🇮', 'CI'),  # Ivory Coast
+            '226':  ('🇧🇫', 'BF'),  # Burkina Faso
+            '227':  ('🇳🇪', 'NE'),  # Niger
+            '228':  ('🇹🇬', 'TG'),  # Togo
+            '229':  ('🇧🇯', 'BJ'),  # Benin
+            '230':  ('🇲🇺', 'MU'),  # Mauritius
+            '231':  ('🇱🇷', 'LR'),  # Liberia
+            '232':  ('🇸🇱', 'SL'),  # Sierra Leone
+            '233':  ('🇬🇭', 'GH'),  # Ghana
+            '234':  ('🇳🇬', 'NG'),
+            '235':  ('🇹🇩', 'TD'),  # Chad
+            '236':  ('🇨🇫', 'CF'),  # Central African Republic
+            '237':  ('🇨🇲', 'CM'),  # Cameroon
+            '238':  ('🇨🇻', 'CV'),  # Cape Verde
+            '239':  ('🇸🇹', 'ST'),  # São Tomé & Príncipe
+            '240':  ('🇬🇶', 'GQ'),  # Equatorial Guinea
+            '241':  ('🇬🇦', 'GA'),  # Gabon
+            '242':  ('🇨🇬', 'CG'),  # Congo
+            '243':  ('🇨🇩', 'CD'),  # DR Congo
+            '244':  ('🇦🇴', 'AO'),  # Angola
+            '245':  ('🇬🇼', 'GW'),  # Guinea-Bissau
+            '246':  ('🇮🇴', 'IO'),  # British Indian Ocean Territory
+            '247':  ('🇦🇨', 'AC'),  # Ascension Island
+            '248':  ('🇸🇨', 'SC'),  # Seychelles
+            '249':  ('🇸🇩', 'SD'),  # Sudan
+            '250':  ('🇷🇼', 'RW'),  # Rwanda
+            '251':  ('🇪🇹', 'ET'),  # Ethiopia
+            '252':  ('🇸🇴', 'SO'),  # Somalia
+            '253':  ('🇩🇯', 'DJ'),  # Djibouti
+            '254':  ('🇰🇪', 'KE'),
+            '255':  ('🇹🇿', 'TZ'),
+            '256':  ('🇺🇬', 'UG'),
+            '257':  ('🇧🇮', 'BI'),  # Burundi
+            '258':  ('🇲🇿', 'MZ'),  # Mozambique
+            '260':  ('🇿🇲', 'ZM'),  # Zambia
+            '261':  ('🇲🇬', 'MG'),  # Madagascar
+            '262':  ('🇷🇪', 'RE'),  # Réunion
+            '263':  ('🇿🇼', 'ZW'),  # Zimbabwe
+            '264':  ('🇳🇦', 'NA'),  # Namibia
+            '265':  ('🇲🇼', 'MW'),  # Malawi
+            '266':  ('🇱🇸', 'LS'),  # Lesotho
+            '267':  ('🇧🇼', 'BW'),  # Botswana
+            '268':  ('🇸🇿', 'SZ'),  # Eswatini
+            '269':  ('🇰🇲', 'KM'),  # Comoros
+            '290':  ('🇸🇭', 'SH'),  # Saint Helena
+            '291':  ('🇪🇷', 'ER'),  # Eritrea
+            '297':  ('🇦🇼', 'AW'),  # Aruba
+            '298':  ('🇫🇴', 'FO'),  # Faroe Islands
+            '299':  ('🇬🇱', 'GL'),  # Greenland
+        }
+
+        # ৩ → ৪ → ২ → ১ সংখ্যা ক্রমে match (longest prefix first)
+        for length in (4, 3, 2, 1):
+            prefix = phone[:length]
+            if prefix in country_map:
+                return country_map[prefix]
+
+        return ('🌐', 'XX')
+
+    def get_platform_icon(self, service):
+        """Service/platform name থেকে emoji বের করে"""
+        s = str(service).lower()
+        icons = {
+            # ── Social Media ──
+            'facebook': '📘', 'fb': '📘',
+            'instagram': '📸', 'ig': '📸',
+            'twitter': '🐦', 'x.com': '🐦',
+            'tiktok': '🎵',
+            'snapchat': '👻',
+            'pinterest': '📌',
+            'tumblr': '📓',
+            'reddit': '🟠',
+            'quora': '❓',
+            'linkedin': '💼',
+            'threads': '🧵',
+            'mastodon': '🐘',
+            'bluesky': '🦋',
+            'vk': '🔵',          # VKontakte
+            'ok.ru': '🟠',       # Odnoklassniki
+            'weibo': '🌊',
+            'douyin': '🎵',
+            'kuaishou': '🎬',
+            'xhs': '📕',         # Xiaohongshu / RedNote
+            'lemon8': '🍋',
+            'myspace': '🎸',
+            'badoo': '💛',
+            'tagged': '🏷️',
+            'meetup': '🤝',
+            'clubhouse': '🎤',
+
+            # ── Messaging ──
+            'whatsapp': '💚', 'wa': '💚',
+            'telegram': '✈️', 'tg': '✈️',
+            'viber': '💜',
+            'line': '💚',
+            'wechat': '💬',
+            'kakao': '🟡',
+            'signal': '🔒',
+            'skype': '🔷',
+            'discord': '🎮',
+            'slack': '💼',
+            'teams': '🟪',      # Microsoft Teams
+            'zoom': '🎥',
+            'imo': '📱',
+            'kik': '💬',
+            'textplus': '💬',
+            'textme': '💬',
+            'pof': '🐟',        # Plenty of Fish
+            'hike': '🟢',
+            'zalo': '🔵',
+            'botim': '📞',
+            'talkatone': '📞',
+
+            # ── Dating ──
+            'tinder': '🔥',
+            'bumble': '🐝',
+            'hinge': '💛',
+            'okcupid': '💘',
+            'match': '💕',
+            'grindr': '🟡',
+            'plenty': '🐟',
+            'badoo': '💛',
+            'momo': '🟠',
+            'tantan': '❤️',
+            'lovoo': '💗',
+
+            # ── Email ──
+            'gmail': '🔴',
+            'google': '🔴',
+            'yahoo': '💜',
+            'outlook': '🔵',
+            'hotmail': '🔵',
+            'proton': '🔒',
+            'protonmail': '🔒',
+            'icloud': '☁️',
+            'yandex': '🟡',
+            'mail.ru': '📧',
+            'aol': '📧',
+            'zoho': '📧',
+            'tutanota': '🔐',
+
+            # ── Tech / Cloud ──
+            'apple': '🍎',
+            'microsoft': '🪟',
+            'amazon': '🛒',
+            'aws': '☁️',
+            'dropbox': '📦',
+            'box': '📦',
+            'github': '🐙',
+            'gitlab': '🦊',
+            'bitbucket': '🪣',
+            'digitalocean': '🌊',
+            'cloudflare': '☁️',
+            'heroku': '💜',
+            'vercel': '▲',
+            'netlify': '💚',
+            'notion': '📒',
+            'trello': '📋',
+            'asana': '🟥',
+            'jira': '🔵',
+            'confluence': '🔵',
+            'figma': '🎨',
+            'canva': '✏️',
+            'adobe': '🔴',
+
+            # ── Finance / Crypto ──
+            'paypal': '💰',
+            'stripe': '💳',
+            'binance': '🟡',
+            'coinbase': '🔵',
+            'kraken': '🐙',
+            'bybit': '🟠',
+            'okx': '⚫',
+            'kucoin': '🟢',
+            'crypto.com': '🔵',
+            'metamask': '🦊',
+            'trustwallet': '🔵',
+            'blockchain': '⛓️',
+            'revolut': '🔵',
+            'wise': '💚',
+            'cashapp': '💵',
+            'venmo': '💙',
+            'zelle': '💜',
+            'chime': '🟢',
+            'robinhood': '🟢',
+            'etoro': '🟢',
+            'skrill': '🔴',
+            'neteller': '🔴',
+            'webmoney': '💰',
+            'qiwi': '🟠',
+            'yoomoney': '🟡',
+            'paytm': '🔵',
+            'phonepe': '💜',
+            'googlepay': '🔴',
+            'applepay': '🍎',
+            'bkash': '🟣',
+            'nagad': '🟠',
+            'rocket': '🚀',
+
+            # ── Entertainment ──
+            'netflix': '🎬',
+            'youtube': '▶️',
+            'spotify': '🎵',
+            'twitch': '💜',
+            'hulu': '💚',
+            'disney': '🏰',
+            'hbo': '🔵',
+            'prime': '🟠',     # Amazon Prime
+            'peacock': '🦚',
+            'paramount': '⭐',
+            'crunchyroll': '🟠',
+            'deezer': '🟣',
+            'tidal': '🔵',
+            'soundcloud': '🟠',
+            'shazam': '🔵',
+            'apple music': '🍎',
+            'vimeo': '🔵',
+            'dailymotion': '🔵',
+            'bilibili': '🔵',
+
+            # ── Gaming ──
+            'steam': '🎮',
+            'epic': '⚫',
+            'origin': '🟠',
+            'ubisoft': '🔵',
+            'blizzard': '🔵',
+            'riot': '🔴',
+            'xbox': '🟢',
+            'playstation': '🎮',
+            'nintendo': '🔴',
+            'roblox': '🟥',
+            'minecraft': '🟩',
+            'pubg': '🎯',
+            'freefire': '🔥',
+            'codm': '🎖️',
+            'mlbb': '🗡️',
+
+            # ── E-commerce / Delivery ──
+            'ebay': '🛍️',
+            'aliexpress': '🛒',
+            'alibaba': '🟠',
+            'shopee': '🟠',
+            'lazada': '🔵',
+            'daraz': '🟠',
+            'flipkart': '🛒',
+            'walmart': '🔵',
+            'target': '🎯',
+            'etsy': '🟠',
+            'wish': '🛍️',
+            'shein': '🛍️',
+            'doordash': '🔴',
+            'ubereats': '🟢',
+            'grubhub': '🟠',
+            'foodpanda': '🐼',
+
+            # ── Ride / Travel ──
+            'uber': '⬛',
+            'lyft': '🟣',
+            'grab': '🟢',
+            'ola': '🟡',
+            'bolt': '🟢',
+            'careem': '🟢',
+            'airbnb': '🔴',
+            'booking': '🔵',
+            'expedia': '🟡',
+            'agoda': '🔴',
+            'hotels': '🏨',
+            'trivago': '🔵',
+
+            # ── Health / Fitness ──
+            'fitbit': '🟢',
+            'myfitnesspal': '🔵',
+            'headspace': '🟠',
+            'calm': '🔵',
+            'noom': '🟢',
+            'strava': '🟠',
+
+            # ── Other / Generic ──
+            'sms': '📩',
+            'otp': '🔑',
+            'bank': '🏦',
+            'gov': '🏛️',
+            'edu': '🎓',
+            'work': '💼',
+            'vpn': '🔒',
+            'security': '🛡️',
+            'auth': '🔐',
+            '2fa': '🔐',
+            'verify': '✅',
+        }
+        for key, icon in icons.items():
+            if key in s:
+                return icon
+        return '📩'
+
     def escape_markdown(self, text):
         text = str(text)
         return text.replace('`', "'")
@@ -129,24 +623,24 @@ class OTPMonitorBot:
         return f"{timestamp}_{phone_number}"
 
     def format_message(self, sms_data, message_text, otp_code):
-        timestamp = self.escape_markdown(sms_data[0])
-        operator = self.escape_markdown(self.extract_operator_name(sms_data[1]))
-        phone = self.escape_markdown(self.hide_phone_number(sms_data[2]))
-        service = self.escape_markdown(sms_data[3] if len(sms_data) > 3 else 'Unknown')
-        msg = self.escape_markdown(message_text)
-        code = self.escape_markdown(otp_code) if otp_code else 'N/A'
-        cost = self.escape_markdown(sms_data[6]) if len(sms_data) > 6 else '$'
+        timestamp    = self.escape_markdown(sms_data[0])
+        raw_phone    = str(sms_data[2])
+        phone        = self.escape_markdown(self.hide_phone_number(raw_phone))
+        service_raw  = sms_data[3] if len(sms_data) > 3 else 'Unknown'
+        service      = self.escape_markdown(service_raw)
+        msg          = self.escape_markdown(message_text)
+        code         = self.escape_markdown(otp_code) if otp_code else 'N/A'
+
+        flag, country_code = self.get_country_flag(raw_phone, sms_data[1] if len(sms_data) > 1 else '')
+        platform_icon = self.get_platform_icon(service_raw)
 
         return (
             "🔥 *𝐅𝐈𝐑𝐒𝐓 𝐎𝐓𝐏 𝐑𝐄𝐂𝐄𝐈𝐕𝐄𝐃* 🔥\n"
             "➖➖➖➖➖➖➖➖➖➖➖\n\n"
+            f"{flag} {country_code} · {platform_icon} · {phone} · {service}\n\n"
+            f"🔑 *𝐎𝐓𝐏 𝐂𝐨𝐝𝐞:* `{code}`\n\n"
             f"📅 *𝐓𝐢𝐦𝐞:* `{timestamp}`\n"
-            f"📱 *𝐍𝐮𝐦𝐛𝐞𝐫:* `{phone}`\n"
-            f"🏢 *𝐎𝐩𝐞𝐫𝐚𝐭𝐨𝐫:* `{operator}`\n"
-            f"📟 *𝐏𝐥𝐚𝐭𝐟𝐨𝐫𝐦:* `{service}`\n\n"
-            f"🟢 *𝐎𝐓𝐏 𝐂𝐨𝐝𝐞:* `{code}`\n\n"
-            f"💰 *𝐂𝐨𝐬𝐭:* `{cost}`\n\n"
-            f"📝 *𝐌𝐞𝐬𝐬𝐚𝐠𝐞:*\n`{msg}`\n\n"
+            f"📝 *𝐌𝐬𝐠:* `{msg}`\n\n"
             "➖➖➖➖➖➖➖➖➖➖➖\n"
             "🤖 *𝐎𝐓𝐏 𝐌𝐨𝐧𝐢𝐭𝐨𝐫 𝐁𝐨𝐭*"
         )
