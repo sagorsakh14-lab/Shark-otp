@@ -135,7 +135,6 @@ class OTPMonitorBot:
         service = self.escape_markdown(sms_data[3] if len(sms_data) > 3 else 'Unknown')
         msg = self.escape_markdown(message_text)
         code = self.escape_markdown(otp_code) if otp_code else 'N/A'
-        cost = self.escape_markdown(sms_data[6]) if len(sms_data) > 6 else '$'
 
         return (
             "🔥 *𝐅𝐈𝐑𝐒𝐓 𝐎𝐓𝐏 𝐑𝐄𝐂𝐄𝐈𝐕𝐄𝐃* 🔥\n"
@@ -145,7 +144,6 @@ class OTPMonitorBot:
             f"🏢 *𝐎𝐩𝐞𝐫𝐚𝐭𝐨𝐫:* `{operator}`\n"
             f"📟 *𝐏𝐥𝐚𝐭𝐟𝐨𝐫𝐦:* `{service}`\n\n"
             f"🟢 *𝐎𝐓𝐏 𝐂𝐨𝐝𝐞:* `{code}`\n\n"
-            f"💰 *𝐂𝐨𝐬𝐭:* `{cost}`\n\n"
             f"📝 *𝐌𝐞𝐬𝐬𝐚𝐠𝐞:*\n`{msg}`\n\n"
             "➖➖➖➖➖➖➖➖➖➖➖\n"
             "🤖 *𝐎𝐓𝐏 𝐌𝐨𝐧𝐢𝐭𝐨𝐫 𝐁𝐨𝐭*"
@@ -330,12 +328,13 @@ class OTPMonitorBot:
                 await asyncio.sleep(1)
 
 async def main():
+    # Updated configuration from your request
     TELEGRAM_BOT_TOKEN = "7955403590:AAFA_UsxTrbmiY9zSlFz3B9aZJ-XP0C2SYc"
     GROUP_CHAT_ID = "-1003247504066"
-    SESSION_COOKIE = "8da33674c0afe01df340e2fdab40cd95"
-    TARGET_HOST = "168.119.13.175"
-    CSSTR_PARAM = "71348c229af01ebba6506e39046c2890"
-    TIMESTAMP_PARAM = "1776355211677"
+    SESSION_COOKIE = "f38c4fdc46aaa539ecb62e84792a4acd"  # Updated cookie
+    TARGET_HOST = "139.99.69.196"  # Updated host
+    CSSTR_PARAM = "71348c229af01ebba6506e39046c2890"  # Keep as is
+    TIMESTAMP_PARAM = "1776423190868"  # Updated timestamp
     TARGET_URL = f"http://{TARGET_HOST}/ints/client/res/data_smscdr.php"
 
     print("=" * 50)
